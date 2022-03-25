@@ -17,6 +17,6 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
-Y<sub>i</sub>= f(x) + &epsilon;<sub>i</sub> with &epsilon;<sub>i</sub> follows a normal distribution with mean 0 and variance &sigma;<sup>2</sup>/w<sub>i</sub>
+Assume that Y<sub>i</sub>= f(x) + &epsilon;<sub>i</sub> with &epsilon;<sub>i</sub> follows a normal distribution with mean 0 and variance &sigma;<sup>2</sup>/w<sub>i</sub>, for i=1,...,N. 
 
 To Be Continue
