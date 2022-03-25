@@ -82,6 +82,7 @@ Hypers InitHypers(const mat& X, const arma::vec& weights, const uvec& group, dou
   out.num_tree = num_tree;
   out.weights = weights;
 
+
   out.num_groups = group.max() + 1;
   out.s = ones<vec>(out.num_groups) / ((double)(out.num_groups));
   out.logs = log(out.s);
@@ -264,12 +265,12 @@ void GetSuffStats(Node* n, const arma::vec& y,
 
 }
 
-double log_prod(const arma::vec& x) {
-  double M = 1.0;
+double log_sum(const arma::vec& x) {
+  double M = 0.0;
   for(int i = 0; (i < x.size()-1); i++){
-    M *= pow(x[i], 2);
+    M += log(x[i]);
   }
-  return log(M);
+  return 2*M;
 }
 
 double LogLT(Node* n, const arma::vec& Y,
@@ -284,10 +285,10 @@ double LogLT(Node* n, const arma::vec& Y,
   arma::mat Omega_inv = zeros<mat>(num_leaves, num_leaves);
   GetSuffStats(n, Y, X, hypers, mu_hat, Omega_inv);
 
-  //int N = Y.size();
+  int N = Y.size();
 
   // Rcout << "Compute ";
-  double out = -0.5 * log_prod(pow(M_2_PI,0.5) * hypers.sigma / hypers.weights) * hypers.temperature;
+  double out = -0.5 * N * log(M_2_PI * pow(hypers.sigma, 2)) + 0.5 * log_sum(hypers.weights) * hypers.temperature;
   out -= 0.5 * num_leaves * log(M_2_PI * pow(hypers.sigma_mu,2));
   double val, sign;
   log_det(val, sign, Omega_inv / M_2_PI);
@@ -1213,7 +1214,7 @@ double Hypers::loglik_tau(double tau,
   double SSE = dot(weights%(Y - Y_hat), weights%(Y - Y_hat));
   double sigma_sq = pow(sigma, 2);
 
-  double loglik = -0.5 * log_prod(sigma/weights) - 0.5 * SSE / sigma_sq;
+  double loglik = -0.5 * Y.size() * log(sigma_sq) + 0.5*log_sum(weights) - 0.5 * SSE / sigma_sq;
 
   width = tau_old;
   return loglik;
@@ -1328,9 +1329,9 @@ double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
 }
 
 double loglik_normal(const arma::vec& resid, const double& sigma, const arma::vec& weights) {
-  //double N = resid.size();
+  double N = resid.size();
   double SSE = dot(weights%resid, weights%resid);
-  return -0.5 * log_prod(pow(M_2_PI,0.5) * sigma / weights) - 0.5 * SSE / pow(sigma, 2);
+  return -0.5 * N * log(M_2_PI * pow(sigma, 2)) + 0.5*log_sum(weights) - 0.5 * SSE / pow(sigma, 2);
 }
 
 void BirthTree(std::vector<Node*>& forest,
