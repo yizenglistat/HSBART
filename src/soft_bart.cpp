@@ -267,7 +267,7 @@ void GetSuffStats(Node* n, const arma::vec& y,
 double log_prod(const arma::vec& x) {
   double M = 1.0;
   for(int i = 0; (i < x.size()-1); i++){
-    M *= x[i];
+    M *= pow(x[i], 2);
   }
   return log(M);
 }
@@ -287,12 +287,12 @@ double LogLT(Node* n, const arma::vec& Y,
   //int N = Y.size();
 
   // Rcout << "Compute ";
-  double out = -0.5 * log_prod(M_2_PI * pow(hypers.sigma/hypers.weights,2)) * hypers.temperature;
+  double out = -0.5 * log_prod(pow(M_2_PI,0.5) * hypers.sigma / hypers.weights) * hypers.temperature;
   out -= 0.5 * num_leaves * log(M_2_PI * pow(hypers.sigma_mu,2));
   double val, sign;
   log_det(val, sign, Omega_inv / M_2_PI);
   out -= 0.5 * val;
-  out -= 0.5 * dot(hypers.weights*Y, hypers.weights*Y) / pow(hypers.sigma, 2) * hypers.temperature;
+  out -= 0.5 * dot(hypers.weights % Y, hypers.weights % Y) / pow(hypers.sigma, 2) * hypers.temperature;
   out += 0.5 * dot(mu_hat, Omega_inv * mu_hat);
 
   // Rcout << "Done";
@@ -315,7 +315,7 @@ double cauchy_jacobian(double tau, double sigma_hat) {
 double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, 
   const arma::vec& weights, double temperature) {
 
-  double SSE = dot(weights*r,weights*r) * temperature;
+  double SSE = dot(weights%r,weights%r) * temperature;
   double n = r.size() * temperature;
 
   double shape = 0.5 * n + 1.0;
@@ -1203,10 +1203,10 @@ double Hypers::loglik_tau(double tau,
   double tau_old = width;
   width = tau;
   vec Y_hat = predict(forest, X, *this);
-  double SSE = dot(weights*(Y - Y_hat), weights*(Y - Y_hat));
+  double SSE = dot(weights%(Y - Y_hat), weights%(Y - Y_hat));
   double sigma_sq = pow(sigma, 2);
 
-  double loglik = -0.5 * log_prod(pow(sigma/weights, 2)) - 0.5 * SSE / sigma_sq;
+  double loglik = -0.5 * log_prod(sigma/weights) - 0.5 * SSE / sigma_sq;
 
   width = tau_old;
   return loglik;
@@ -1322,8 +1322,8 @@ double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
 
 double loglik_normal(const arma::vec& resid, const double& sigma, const arma::vec& weights) {
   //double N = resid.size();
-  double SSE = dot(weights*resid, weights*resid);
-  return -0.5 * log_prod(M_2_PI * pow(sigma/weights, 2)) - 0.5 * SSE / pow(sigma, 2);
+  double SSE = dot(weights%resid, weights%resid);
+  return -0.5 * log_prod(pow(M_2_PI,0.5) * sigma / weights) - 0.5 * SSE / pow(sigma, 2);
 }
 
 void BirthTree(std::vector<Node*>& forest,
