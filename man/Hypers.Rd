@@ -14,7 +14,7 @@ Hypers(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 
 
 \item{Y}{Nx1 vector of training data response.}
 
-\item{weights}{variance weights associated with sigma.}
+\item{weights}{NX1 vector of weights associated with sigma.}
 
 \item{group}{For each column of X, gives the associated group}
 
