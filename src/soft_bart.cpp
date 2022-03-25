@@ -62,7 +62,7 @@ Opts InitOpts(int num_burn, int num_thin, int num_save, int num_print,
 
 }
 
-Hypers InitHypers(const mat& X, const vec& weights, const uvec& group, double sigma_hat,
+Hypers InitHypers(const mat& X, const arma::vec& weights, const uvec& group, double sigma_hat,
                   double alpha, double beta,
                   double gamma, double k, double width, double shape,
                   int num_tree, double alpha_scale, double alpha_shape_1,
@@ -312,10 +312,10 @@ double cauchy_jacobian(double tau, double sigma_hat) {
 }
 
 // [[Rcpp::export]]
-double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old,
-                    double temperature) {
+double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, 
+  const arma::vec& weights, double temperature) {
 
-  double SSE = dot(hypers.weights*r,hypers.weights*r) * temperature;
+  double SSE = dot(weights*r,weights*r) * temperature;
   double n = r.size() * temperature;
 
   double shape = 0.5 * n + 1.0;
@@ -333,11 +333,11 @@ double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old,
 }
 
 void Hypers::UpdateSigma(const arma::vec& r) {
-  sigma = update_sigma(r, sigma_hat, sigma, temperature);
+  sigma = update_sigma(r, sigma_hat, sigma, weights, temperature);
 }
 
 void Hypers::UpdateSigmaMu(const arma::vec& means) {
-  sigma_mu = update_sigma(means, sigma_mu_hat, sigma_mu);
+  sigma_mu = update_sigma(means, sigma_mu_hat, sigma_mu, weights);
 }
 
 void Node::UpdateMu(const arma::vec& Y, const arma::mat& X, const Hypers& hypers) {
@@ -1151,6 +1151,7 @@ Hypers::Hypers(Rcpp::List hypers) {
   tau_rate = hypers["tau_rate"];
   num_tree_prob = hypers["num_tree_prob"];
   temperature = hypers["temperature"];
+  weights = as<arma::vec>(hypers["weights"]);
 
   // Deal with group and num_group
   group = as<arma::uvec>(hypers["group"]);
@@ -1202,10 +1203,10 @@ double Hypers::loglik_tau(double tau,
   double tau_old = width;
   width = tau;
   vec Y_hat = predict(forest, X, *this);
-  double SSE = dot(hypers.weights*(Y - Y_hat), hypers.weights*(Y - Y_hat));
+  double SSE = dot(weights*(Y - Y_hat), weights*(Y - Y_hat));
   double sigma_sq = pow(sigma, 2);
 
-  double loglik = -0.5 * log_prod(pow(sigma/hypers.weights, 2)) - 0.5 * SSE / sigma_sq;
+  double loglik = -0.5 * log_prod(pow(sigma/weights, 2)) - 0.5 * SSE / sigma_sq;
 
   width = tau_old;
   return loglik;
@@ -1316,13 +1317,13 @@ void update_num_tree(std::vector<Node*>& forest, Hypers& hypers,
 double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
              const arma::vec& Y, const arma::mat& X) {
   vec resid = Y - predict(forest, X, hypers);
-  return loglik_normal(resid, hypers.sigma);
+  return loglik_normal(resid, hypers.sigma, hypers.weights);
 }
 
-double loglik_normal(const arma::vec& resid, const double& sigma) {
+double loglik_normal(const arma::vec& resid, const double& sigma, const arma::vec& weights) {
   double N = resid.size();
-  double SSE = dot(hypers.weights*resid, hypers.weights*resid);
-  return -0.5 * log_prod(M_2_PI * pow(sigma/hypers.weights, 2)) - 0.5 * SSE / pow(sigma, 2);
+  double SSE = dot(weights*resid, weights*resid);
+  return -0.5 * log_prod(M_2_PI * pow(sigma/weights, 2)) - 0.5 * SSE / pow(sigma, 2);
 }
 
 void BirthTree(std::vector<Node*>& forest,
@@ -1334,7 +1335,7 @@ void BirthTree(std::vector<Node*>& forest,
 
   // Log likelihood of current state
   // Rcout << "1";
-  double loglik_old = loglik_normal(res, hypers.sigma);
+  double loglik_old = loglik_normal(res, hypers.sigma, hypers.weights);
 
   // Add tree and modify hypers
   // Rcout << "2";
@@ -1369,7 +1370,7 @@ void DeathTree(std::vector<Node*>& forest,
                const arma::mat& X) {
 
   // Log likelihood of current state
-  double loglik_old = loglik_normal(res, hypers.sigma);
+  double loglik_old = loglik_normal(res, hypers.sigma, hypers.weights);
 
   // Delete tree and modify hypers
   // Rcout << "Delete tree!";

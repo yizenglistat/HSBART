@@ -25,16 +25,15 @@ rcpparma_bothproducts <- function(x) {
     .Call('_SoftBart_rcpparma_bothproducts', PACKAGE = 'SoftBart', x)
 }
 
-update_sigma <- function(r, sigma_hat, sigma_old, temperature) {
-    .Call('_SoftBart_update_sigma', PACKAGE = 'SoftBart', r, sigma_hat, sigma_old, temperature)
+update_sigma <- function(r, sigma_hat, sigma_old, weights, temperature) {
+    .Call('_SoftBart_update_sigma', PACKAGE = 'SoftBart', r, sigma_hat, sigma_old, weights, temperature)
 }
 
 rlgam <- function(shape) {
     .Call('_SoftBart_rlgam', PACKAGE = 'SoftBart', shape)
 }
 
-SoftBart <- function(X, Y, X_test, weights=NULL, group, alpha, beta, gamma, sigma, shape, width, num_tree, sigma_hat, k, alpha_scale, alpha_shape_1, alpha_shape_2, tau_rate, num_tree_prob, temperature, num_burn, num_thin, num_save, num_print, update_sigma, update_sigma_mu, update_s, update_alpha, update_beta, update_gamma, update_tau, update_tau_mean, update_num_tree) {
-
+SoftBart <- function(X, Y, X_test, weights, group, alpha, beta, gamma, sigma, shape, width, num_tree, sigma_hat, k, alpha_scale, alpha_shape_1, alpha_shape_2, tau_rate, num_tree_prob, temperature, num_burn, num_thin, num_save, num_print, update_sigma, update_sigma_mu, update_s, update_alpha, update_beta, update_gamma, update_tau, update_tau_mean, update_num_tree) {
     .Call('_SoftBart_SoftBart', PACKAGE = 'SoftBart', X, Y, X_test, weights, group, alpha, beta, gamma, sigma, shape, width, num_tree, sigma_hat, k, alpha_scale, alpha_shape_1, alpha_shape_2, tau_rate, num_tree_prob, temperature, num_burn, num_thin, num_save, num_print, update_sigma, update_sigma_mu, update_s, update_alpha, update_beta, update_gamma, update_tau, update_tau_mean, update_num_tree)
 }
 

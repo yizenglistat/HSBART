@@ -22,6 +22,7 @@ struct Hypers {
   int num_tree;
   int num_groups;
   arma::vec s;
+  arma::vec weights;
   arma::vec logs;
   arma::uvec group;
 
@@ -104,7 +105,8 @@ struct Opts {
   int num_thin;
   int num_save;
   int num_print;
-
+  
+  bool update_sigma;
   bool update_sigma_mu;
   bool update_s;
   bool update_alpha;
@@ -114,7 +116,7 @@ struct Opts {
   bool update_tau_mean;
   bool update_num_tree;
 
-Opts() : update_sigma_mu(true), update_s(true), update_alpha(true),
+Opts() : update_sigma(true), update_sigma_mu(true), update_s(true), update_alpha(true),
     update_beta(false), update_gamma(false), update_tau(true),
     update_tau_mean(false), update_num_tree(false) {
 
@@ -127,6 +129,7 @@ Opts() : update_sigma_mu(true), update_s(true), update_alpha(true),
 
 Opts(Rcpp::List opts_) {
 
+  update_sigma = opts_["update_sigma"];
   update_sigma_mu = opts_["update_sigma_mu"];
   update_s = opts_["update_s"];
   update_alpha = opts_["update_alpha"];
@@ -177,12 +180,13 @@ class Forest {
 
 
 Opts InitOpts(int num_burn, int num_thin, int num_save, int num_print,
-              bool update_sigma_mu, bool update_s, bool update_alpha,
+              bool update_sigma, bool update_sigma_mu, bool update_s, bool update_alpha,
               bool update_beta, bool update_gamma, bool update_tau,
               bool update_tau_mean, bool update_num_tree);
 
 
-Hypers InitHypers(const arma::mat& X, double sigma_hat, double alpha, double beta,
+Hypers InitHypers(const arma::mat& X, const arma::vec& weights, 
+                  double sigma_hat, double alpha, double beta,
                   double gamma, double k, double width, double shape,
                   int num_tree, double alpha_scale, double alpha_shape_1,
                   double alpha_shape_2, double tau_rate, double num_tree_prob,
@@ -197,8 +201,8 @@ double LogLT(Node* n, const arma::vec& Y,
 
 double cauchy_jacobian(double tau, double sigma_hat);
 
-double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old,
-                    double temperature = 1.0);
+double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, 
+                    const arma::vec& weights, double temperature = 1.0);
 arma::vec loglik_data(const arma::vec& Y, const arma::vec& Y_hat, const Hypers& hypers);
 arma::vec predict(const std::vector<Node*>& forest,
                   const arma::mat& X,
@@ -282,7 +286,7 @@ void update_num_tree(std::vector<Node*>& forest, Hypers& hypers,
                      const arma::mat& X);
 double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
              const arma::vec& Y, const arma::mat& X);
-double loglik_normal(const arma::vec& resid, const double& sigma);
+double loglik_normal(const arma::vec& resid, const double& sigma, const arma::vec& weights);
 void BirthTree(std::vector<Node*>& forest,
                Hypers& hypers,
                const Opts& opts,
