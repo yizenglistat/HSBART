@@ -17,7 +17,8 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
-<img src="https://render.githubusercontent.com/render/math?math=Y_i=f(X_i)">
-+<img src="https://render.githubusercontent.com/render/math?math=\epsilon_i">
+\begin{equation}
+Y=x+s+\epsilon_i
+\end{equation}
 
 To Be Continue
