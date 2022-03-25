@@ -5,7 +5,7 @@
 \title{MCMC options for SoftBart}
 \usage{
 Opts(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100,
-  update_sigma_mu = TRUE, update_s = TRUE, update_alpha = TRUE,
+  update_sigma = TRUE, update_sigma_mu = TRUE, update_s = TRUE, update_alpha = TRUE,
   update_beta = FALSE, update_gamma = FALSE, update_tau = TRUE,
   update_tau_mean = FALSE)
 }
@@ -17,6 +17,8 @@ Opts(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100,
 \item{num_save}{The number of samples to collect; in total, num_burn + num_save * num_thin iterations are run}
 
 \item{num_print}{Interval for how often to print the chain's progress}
+
+\item{update_sigma}{If true, sigma are updated}
 
 \item{update_sigma_mu}{If true, sigma_mu/k are updated, with a half-Cauchy prior on sigma_mu centered at the initial guess}
 

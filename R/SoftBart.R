@@ -20,11 +20,11 @@
 #' @param num_tree_prob Parameter for geometric prior on number of tree
 #'
 #' @return Returns a list containing the function arguments.
-Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
+Hypers <- function(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
                    sigma_hat = NULL, shape = 1, width = 0.1, num_tree = 20,
                    alpha_scale = NULL, alpha_shape_1 = 0.5,
                    alpha_shape_2 = 1, tau_rate = 10, num_tree_prob = NULL,
-                   temperature = 1.0,weights=NULL) {
+                   temperature = 1.0) {
 
   if(is.null(alpha_scale)) alpha_scale <- ncol(X)
   if(is.null(num_tree_prob)) num_tree_prob <- 2.0 / num_tree
@@ -74,6 +74,7 @@ Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 #' @param num_thin Thinning interval for the chain.
 #' @param num_save The number of samples to collect; in total, num_burn + num_save * num_thin iterations are run
 #' @param num_print Interval for how often to print the chain's progress
+#' @param update_sigma if true, sigmu update
 #' @param update_sigma_mu If true, sigma_mu/k are updated, with a half-Cauchy prior on sigma_mu centered at the initial guess
 #' @param update_s If true, s is updated using the Dirichlet prior.
 #' @param update_alpha If true, alpha is updated using a scaled beta prime prior
@@ -84,7 +85,7 @@ Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 #'
 #' @return Returns a list containing the function arguments
 Opts <- function(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100,
-                 update_sigma_mu = TRUE, update_s = TRUE, update_alpha = TRUE,
+                 update_sigma = TRUE, update_sigma_mu = FALSE, update_s = TRUE, update_alpha = TRUE,
                  update_beta = FALSE, update_gamma = FALSE, update_tau = TRUE,
                  update_tau_mean = FALSE) {
   out <- list()
@@ -92,6 +93,7 @@ Opts <- function(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100
   out$num_thin        <- num_thin
   out$num_save        <- num_save
   out$num_print       <- num_print
+  out$update_sigma    <- update_sigma
   out$update_sigma_mu <- update_sigma_mu
   out$update_s         <- update_s
   out$update_alpha    <- update_alpha
@@ -170,6 +172,7 @@ softbart <- function(X, Y, X_test, hypers = NULL, opts = Opts()) {
   X_test <- X_trans[-idx_train,,drop=FALSE]
 
   fit <- SoftBart(X,Z,X_test,
+                  hypers$weights,
                   hypers$group,
                   hypers$alpha,
                   hypers$beta,
@@ -190,6 +193,7 @@ softbart <- function(X, Y, X_test, hypers = NULL, opts = Opts()) {
                   opts$num_thin,
                   opts$num_save,
                   opts$num_print,
+                  opts$update_sigma,
                   opts$update_sigma_mu,
                   opts$update_s,
                   opts$update_alpha,
@@ -197,8 +201,7 @@ softbart <- function(X, Y, X_test, hypers = NULL, opts = Opts()) {
                   opts$update_gamma,
                   opts$update_tau,
                   opts$update_tau_mean,
-                  opts$update_num_tree,
-                  hypers$weights)
+                  opts$update_num_tree)
 
 
   a <- min(Y)

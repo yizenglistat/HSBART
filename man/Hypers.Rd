@@ -4,15 +4,17 @@
 \alias{Hypers}
 \title{Create hyperparameter object for SoftBart}
 \usage{
-Hypers(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
+Hypers(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
   sigma_hat = NULL, shape = 1, width = 0.1, num_tree = 20,
   alpha_scale = NULL, alpha_shape_1 = 0.5, alpha_shape_2 = 1,
-  tau_rate = 10, num_tree_prob = NULL, temperature = 1, weights=NULL)
+  tau_rate = 10, num_tree_prob = NULL, temperature = 1)
 }
 \arguments{
 \item{X}{NxP matrix of training data covariates.}
 
 \item{Y}{Nx1 vector of training data response.}
+
+\item{weights}{variance weights associated with sigma.}
 
 \item{group}{For each column of X, gives the associated group}
 
@@ -39,8 +41,6 @@ Hypers(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 \item{alpha_shape_2}{Shape parameter for prior on alpha; if not provided, defaults to 1.0}
 
 \item{num_tree_prob}{Parameter for geometric prior on number of tree}
-
-\item{weights}{variance weights associated with sigma}
 }
 \value{
 Returns a list containing the function arguments.

@@ -39,7 +39,7 @@ Node::Node() {
 }
 
 Opts InitOpts(int num_burn, int num_thin, int num_save, int num_print,
-              bool update_sigma_mu, bool update_s, bool update_alpha,
+              bool update_sigma, bool update_sigma_mu, bool update_s, bool update_alpha,
               bool update_beta, bool update_gamma, bool update_tau,
               bool update_tau_mean, bool update_num_tree) {
 
@@ -48,6 +48,7 @@ Opts InitOpts(int num_burn, int num_thin, int num_save, int num_print,
   out.num_thin = num_thin;
   out.num_save = num_save;
   out.num_print = num_print;
+  out.update_sigma = update_sigma;
   out.update_sigma_mu = update_sigma_mu;
   out.update_s = update_s;
   out.update_alpha = update_alpha;
@@ -61,7 +62,7 @@ Opts InitOpts(int num_burn, int num_thin, int num_save, int num_print,
 
 }
 
-Hypers InitHypers(const mat& X, const uvec& group, double sigma_hat,
+Hypers InitHypers(const mat& X, const vec& weights, const uvec& group, double sigma_hat,
                   double alpha, double beta,
                   double gamma, double k, double width, double shape,
                   int num_tree, double alpha_scale, double alpha_shape_1,
@@ -79,6 +80,7 @@ Hypers InitHypers(const mat& X, const uvec& group, double sigma_hat,
   out.shape = shape;
   out.width = width;
   out.num_tree = num_tree;
+  out.weights = weights;
 
   out.num_groups = group.max() + 1;
   out.s = ones<vec>(out.num_groups) / ((double)(out.num_groups));
@@ -251,8 +253,8 @@ void GetSuffStats(Node* n, const arma::vec& y,
     for(int j = 0; j < num_leaves; j++) {
       w_i(j) = leafs[j]->current_weight;
     }
-    mu_hat = mu_hat + y(i) * w_i;
-    Lambda = Lambda + w_i * trans(w_i);
+    mu_hat = mu_hat + pow(hypers.weights(i),2) * y(i) * w_i;
+    Lambda = Lambda + pow(hypers.weights(i),2) * w_i * trans(w_i);
   }
 
   Lambda = Lambda / pow(hypers.sigma, 2) * hypers.temperature;
@@ -260,6 +262,14 @@ void GetSuffStats(Node* n, const arma::vec& y,
   Omega_inv_out = Lambda + eye(num_leaves, num_leaves) / pow(hypers.sigma_mu, 2);
   mu_hat_out = solve(Omega_inv_out, mu_hat);
 
+}
+
+double log_prod(const arma::vec& x) {
+  double M = 1.0;
+  for(int i = 0; (i < x.size()-1); i++){
+    M *= x[i];
+  }
+  return log(M);
 }
 
 double LogLT(Node* n, const arma::vec& Y,
@@ -277,12 +287,12 @@ double LogLT(Node* n, const arma::vec& Y,
   int N = Y.size();
 
   // Rcout << "Compute ";
-  double out = -0.5 * N * log(M_2_PI * pow(hypers.sigma,2)) * hypers.temperature;
+  double out = -0.5 * log_prod(M_2_PI * pow(hypers.sigma/hypers.weights,2)) * hypers.temperature;
   out -= 0.5 * num_leaves * log(M_2_PI * pow(hypers.sigma_mu,2));
   double val, sign;
   log_det(val, sign, Omega_inv / M_2_PI);
   out -= 0.5 * val;
-  out -= 0.5 * dot(Y, Y) / pow(hypers.sigma, 2) * hypers.temperature;
+  out -= 0.5 * dot(hypers.weights*Y, hypers.weights*Y) / pow(hypers.sigma, 2) * hypers.temperature;
   out += 0.5 * dot(mu_hat, Omega_inv * mu_hat);
 
   // Rcout << "Done";
@@ -305,7 +315,7 @@ double cauchy_jacobian(double tau, double sigma_hat) {
 double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old,
                     double temperature) {
 
-  double SSE = dot(r,r) * temperature;
+  double SSE = dot(hypers.weights*r,hypers.weights*r) * temperature;
   double n = r.size() * temperature;
 
   double shape = 0.5 * n + 1.0;
@@ -583,7 +593,7 @@ void IterateGibbsNoS(std::vector<Node*>& forest, arma::vec& Y_hat,
   arma::vec means = get_means(forest);
 
   // Rcout << "Doing other updates";
-  hypers.UpdateSigma(res);
+  if(opts.update_sigma) hypers.UpdateSigma(res);
   if(opts.update_sigma_mu) hypers.UpdateSigmaMu(means);
   if(opts.update_beta) hypers.UpdateBeta(forest);
   if(opts.update_gamma) hypers.UpdateGamma(forest);
@@ -1031,13 +1041,14 @@ arma::vec loglik_data(const arma::vec& Y, const arma::vec& Y_hat, const Hypers& 
   vec res = Y - Y_hat;
   vec out = zeros<vec>(Y.size());
   for(int i = 0; i < Y.size(); i++) {
-    out(i) = -0.5 * log(M_2_PI * pow(hypers.sigma,2)) - 0.5 * pow(res(i) / hypers.sigma, 2);
+    out(i) = -0.5 * log(M_2_PI * pow(hypers.sigma/hypers.weights(i),2)) - 0.5 * pow(res(i) / (hypers.sigma/hypers.weights(i)), 2);
   }
   return out;
 }
 
 // [[Rcpp::export]]
 List SoftBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test,
+              const arma::vec& weights,
               const arma::uvec& group,
               double alpha, double beta, double gamma, double sigma,
               double shape, double width, int num_tree,
@@ -1046,16 +1057,16 @@ List SoftBart(const arma::mat& X, const arma::vec& Y, const arma::mat& X_test,
               double num_tree_prob,
               double temperature,
               int num_burn,
-              int num_thin, int num_save, int num_print, bool update_sigma_mu,
+              int num_thin, int num_save, int num_print, bool update_sigma, bool update_sigma_mu,
               bool update_s, bool update_alpha, bool update_beta, bool update_gamma,
               bool update_tau, bool update_tau_mean, bool update_num_tree) {
 
 
-  Opts opts = InitOpts(num_burn, num_thin, num_save, num_print, update_sigma_mu,
+  Opts opts = InitOpts(num_burn, num_thin, num_save, num_print, update_sigma, update_sigma_mu,
                        update_s, update_alpha, update_beta, update_gamma,
                        update_tau, update_tau_mean, update_num_tree);
 
-  Hypers hypers = InitHypers(X, group, sigma_hat, alpha, beta, gamma, k, width,
+  Hypers hypers = InitHypers(X, weights, group, sigma_hat, alpha, beta, gamma, k, width,
                              shape, num_tree, alpha_scale, alpha_shape_1,
                              alpha_shape_2, tau_rate, num_tree_prob, temperature);
 
@@ -1191,10 +1202,10 @@ double Hypers::loglik_tau(double tau,
   double tau_old = width;
   width = tau;
   vec Y_hat = predict(forest, X, *this);
-  double SSE = dot(Y - Y_hat, Y - Y_hat);
+  double SSE = dot(hypers.weights*(Y - Y_hat), hypers.weights*(Y - Y_hat));
   double sigma_sq = pow(sigma, 2);
 
-  double loglik = -0.5 * Y.size() * log(sigma_sq) - 0.5 * SSE / sigma_sq;
+  double loglik = -0.5 * log_prod(pow(sigma/hypers.weights, 2)) - 0.5 * SSE / sigma_sq;
 
   width = tau_old;
   return loglik;
@@ -1310,8 +1321,8 @@ double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
 
 double loglik_normal(const arma::vec& resid, const double& sigma) {
   double N = resid.size();
-  double SSE = dot(resid, resid);
-  return -0.5 * N * log(M_2_PI * pow(sigma, 2)) - 0.5 * SSE / pow(sigma, 2);
+  double SSE = dot(hypers.weights*resid, hypers.weights*resid);
+  return -0.5 * log_prod(M_2_PI * pow(sigma/hypers.weights, 2)) - 0.5 * SSE / pow(sigma, 2);
 }
 
 void BirthTree(std::vector<Node*>& forest,

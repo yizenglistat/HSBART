@@ -64,4 +64,12 @@ double log_sum_exp(const arma::vec& x) {
   return M + log(sum(exp(x - M)));
 }
 
+// double log_prod(const arma::vec& x) {
+//   double M = 1.0;
+//   for(int i = 0; (i < x.size()-1); i++){
+//     M *= x[i];
+//   }
+//   return log(M);
+// }
+
 #endif
