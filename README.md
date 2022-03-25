@@ -17,6 +17,6 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
-Assume that Y<sub>i</sub>= f(x) + &epsilon;<sub>i</sub> with &epsilon;<sub>i</sub> follows a normal distribution with mean 0 and variance &sigma;<sup>2</sup>/w<sub>i</sub>, for i=1,...,N. 
+Assume that Y<sub>i</sub>= f(x) + &epsilon;<sub>i</sub> with &epsilon;<sub>i</sub> follows a normal distribution with mean 0 and variance &sigma;<sup>2</sup>/w<sub>i</sub>, for i=1,...,N. Here w<sup>1/2</sup>'s are our weight vector in the package. 
 
-To Be Continue
+Note you could still recover the original SoftBart functionality without feeding the weights into it or set the weights to be ones. 
