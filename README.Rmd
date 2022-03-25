@@ -1,5 +1,5 @@
 ---
-title: "Soft Bayesian Sum of Trees Models"
+title: "Soft Bayesian Additive Models"
 output: github_document
 ---
 
