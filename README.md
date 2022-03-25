@@ -17,4 +17,6 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
+$$y_i = f(x_i) + \epsilon_i$$
+
 To Be Continue
