@@ -284,7 +284,7 @@ double LogLT(Node* n, const arma::vec& Y,
   arma::mat Omega_inv = zeros<mat>(num_leaves, num_leaves);
   GetSuffStats(n, Y, X, hypers, mu_hat, Omega_inv);
 
-  int N = Y.size();
+  //int N = Y.size();
 
   // Rcout << "Compute ";
   double out = -0.5 * log_prod(M_2_PI * pow(hypers.sigma/hypers.weights,2)) * hypers.temperature;
@@ -1321,7 +1321,7 @@ double LogLF(const std::vector<Node*>& forest, const Hypers& hypers,
 }
 
 double loglik_normal(const arma::vec& resid, const double& sigma, const arma::vec& weights) {
-  double N = resid.size();
+  //double N = resid.size();
   double SSE = dot(weights*resid, weights*resid);
   return -0.5 * log_prod(M_2_PI * pow(sigma/weights, 2)) - 0.5 * SSE / pow(sigma, 2);
 }
