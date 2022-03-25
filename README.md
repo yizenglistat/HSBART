@@ -17,8 +17,6 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
-\begin{equation}
-Y=x+s+\epsilon_i
-\end{equation}
+h<sub>&theta;</sub>(x) = &theta;<sub>o</sub> x + &theta;<sub>1</sub>x
 
 To Be Continue
