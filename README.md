@@ -12,7 +12,7 @@ To install the package, if you are a mac OSX user, you should install the gfortr
 
 ``` r
 library(devtools)
-install_github("yizenglistat/HSBART")
+install_github("yizenglistat/wsBART")
 ```
 
 ## Usage
