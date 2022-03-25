@@ -17,6 +17,6 @@ install_github("yizenglistat/wsBART")
 
 ## Usage
 
-h<sub>&theta;</sub>(x) = &theta;<sub>o</sub> x + &theta;<sub>1</sub>x
+Y<sub>i</sub>= f(x) + &epsilon;<sub>i</sub> with &epsilon;<sub>i</sub> follows a normal distribution with mean 0 and variance &sigma;<sup>2</sup>/w<sub>i</sub>
 
 To Be Continue
