@@ -312,10 +312,17 @@ double cauchy_jacobian(double tau, double sigma_hat) {
 }
 
 // [[Rcpp::export]]
-double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, 
+double update_sigma(bool issigma, const arma::vec& r, double sigma_hat, double sigma_old, 
   const arma::vec& weights, double temperature) {
 
-  double SSE = dot(weights%r,weights%r) * temperature;
+  double SSE;
+  
+  if(issigma){
+    SSE = dot(weights%r,weights%r) * temperature;
+  }else{
+    SSE = dot(r,r) * temperature;
+  }
+
   double n = r.size() * temperature;
 
   double shape = 0.5 * n + 1.0;
@@ -333,11 +340,11 @@ double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old,
 }
 
 void Hypers::UpdateSigma(const arma::vec& r) {
-  sigma = update_sigma(r, sigma_hat, sigma, weights, temperature);
+  sigma = update_sigma(TRUE, r, sigma_hat, sigma, weights, temperature);
 }
 
 void Hypers::UpdateSigmaMu(const arma::vec& means) {
-  sigma_mu = update_sigma(means, sigma_mu_hat, sigma_mu, weights);
+  sigma_mu = update_sigma(FALSE, means, sigma_mu_hat, sigma_mu, weights);
 }
 
 void Node::UpdateMu(const arma::vec& Y, const arma::mat& X, const Hypers& hypers) {

@@ -201,7 +201,7 @@ double LogLT(Node* n, const arma::vec& Y,
 
 double cauchy_jacobian(double tau, double sigma_hat);
 
-double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, 
+double update_sigma(bool issigma, const arma::vec& r, double sigma_hat, double sigma_old, 
                     const arma::vec& weights, double temperature = 1.0);
 arma::vec loglik_data(const arma::vec& Y, const arma::vec& Y_hat, const Hypers& hypers);
 arma::vec predict(const std::vector<Node*>& forest,

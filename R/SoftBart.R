@@ -85,7 +85,7 @@ Hypers <- function(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma 
 #'
 #' @return Returns a list containing the function arguments
 Opts <- function(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100,
-                 update_sigma = TRUE, update_sigma_mu = FALSE, update_s = TRUE, update_alpha = TRUE,
+                 update_sigma = TRUE, update_sigma_mu = TRUE, update_s = TRUE, update_alpha = TRUE,
                  update_beta = FALSE, update_gamma = FALSE, update_tau = TRUE,
                  update_tau_mean = FALSE) {
   out <- list()

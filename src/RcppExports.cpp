@@ -78,17 +78,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // update_sigma
-double update_sigma(const arma::vec& r, double sigma_hat, double sigma_old, const arma::vec& weights, double temperature);
-RcppExport SEXP _SoftBart_update_sigma(SEXP rSEXP, SEXP sigma_hatSEXP, SEXP sigma_oldSEXP, SEXP weightsSEXP, SEXP temperatureSEXP) {
+double update_sigma(bool issigma, const arma::vec& r, double sigma_hat, double sigma_old, const arma::vec& weights, double temperature);
+RcppExport SEXP _SoftBart_update_sigma(SEXP issigmaSEXP, SEXP rSEXP, SEXP sigma_hatSEXP, SEXP sigma_oldSEXP, SEXP weightsSEXP, SEXP temperatureSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type issigma(issigmaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type r(rSEXP);
     Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
     Rcpp::traits::input_parameter< double >::type sigma_old(sigma_oldSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< double >::type temperature(temperatureSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_sigma(r, sigma_hat, sigma_old, weights, temperature));
+    rcpp_result_gen = Rcpp::wrap(update_sigma(issigma, r, sigma_hat, sigma_old, weights, temperature));
     return rcpp_result_gen;
 END_RCPP
 }
