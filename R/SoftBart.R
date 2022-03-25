@@ -20,11 +20,11 @@
 #' @param num_tree_prob Parameter for geometric prior on number of tree
 #'
 #' @return Returns a list containing the function arguments.
-Hypers <- function(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
+Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
                    sigma_hat = NULL, shape = 1, width = 0.1, num_tree = 20,
                    alpha_scale = NULL, alpha_shape_1 = 0.5,
                    alpha_shape_2 = 1, tau_rate = 10, num_tree_prob = NULL,
-                   temperature = 1.0) {
+                   temperature = 1.0,weights=NULL) {
 
   if(is.null(alpha_scale)) alpha_scale <- ncol(X)
   if(is.null(num_tree_prob)) num_tree_prob <- 2.0 / num_tree
@@ -170,7 +170,6 @@ softbart <- function(X, Y, X_test, hypers = NULL, opts = Opts()) {
   X_test <- X_trans[-idx_train,,drop=FALSE]
 
   fit <- SoftBart(X,Z,X_test,
-                  hypers$weights,
                   hypers$group,
                   hypers$alpha,
                   hypers$beta,
@@ -198,7 +197,8 @@ softbart <- function(X, Y, X_test, hypers = NULL, opts = Opts()) {
                   opts$update_gamma,
                   opts$update_tau,
                   opts$update_tau_mean,
-                  opts$update_num_tree)
+                  opts$update_num_tree,
+                  hypers$weights)
 
 
   a <- min(Y)
