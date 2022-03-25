@@ -29,7 +29,7 @@ Hypers <- function(X, Y, weights=NULL, group = NULL, alpha = 1, beta = 2, gamma 
   if(is.null(alpha_scale)) alpha_scale <- ncol(X)
   if(is.null(num_tree_prob)) num_tree_prob <- 2.0 / num_tree
 
-  if(is.null(weights)) weights <- rep(1, nrow(X))
+  if(is.null(weights)) weights <- rep(1, length(Y))
 
   out                                  <- list()
 
