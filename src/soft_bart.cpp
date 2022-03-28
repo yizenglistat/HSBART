@@ -1536,10 +1536,8 @@ Node::~Node() {
 arma::mat Forest::do_gibbs(const arma::mat& X, const arma::vec& Y,
                            const arma::mat& X_test, int num_iter, 
                            const arma::vec& weights) {
-  if(weights(0)!=1 || weights.size()!=1){
-    hypers.weights = weights;
-  }
-
+  hypers.weights = weights;
+  
   vec Y_hat = predict(trees, X, hypers);
   mat Y_out = zeros<mat>(num_iter, X_test.n_rows);
 

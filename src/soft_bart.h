@@ -166,7 +166,7 @@ class Forest {
   arma::mat do_gibbs(const arma::mat& X,
                      const arma::vec& Y,
                      const arma::mat& X_test, int num_iter, 
-                     const arma::vec& weights = arma::ones<arma::vec>(1));
+                     const arma::vec& weights);
   arma::vec get_s() {return hypers.s;}
   arma::uvec get_counts();
   arma::umat get_tree_counts();
