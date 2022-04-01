@@ -1534,11 +1534,7 @@ Node::~Node() {
 }
 
 arma::mat Forest::do_gibbs(const arma::mat& X, const arma::vec& Y,
-                           const arma::mat& X_test, int num_iter, 
-                           const arma::vec& weights) {
-  if(weights(0)!=1 || weights.size()!=1){
-    hypers.weights = weights;
-  }
+                           const arma::mat& X_test, int num_iter) {
 
   vec Y_hat = predict(trees, X, hypers);
   mat Y_out = zeros<mat>(num_iter, X_test.n_rows);
@@ -1572,6 +1568,10 @@ void Forest::set_s(const arma::vec& s_) {
 
 void Forest::set_sigma(double s) {
   hypers.sigma = s;
+}
+
+void Forest::set_weights(const arma::vec& weights) {
+  hypers.weights = weights;
 }
 
 double Forest::get_sigma() {
@@ -1609,6 +1609,7 @@ RCPP_MODULE(mod_forest) {
     .method("set_s", &Forest::set_s)
     .method("get_sigma", &Forest::get_sigma)
     .method("set_sigma", &Forest::set_sigma)
+    .method("set_weights", &Forest::set_weights)
     .method("do_predict", &Forest::do_predict)
     .method("get_tree_counts", &Forest::get_tree_counts)
     .field("num_gibbs", &Forest::num_gibbs);

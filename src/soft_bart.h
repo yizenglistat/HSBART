@@ -165,12 +165,12 @@ class Forest {
   // arma::vec predict(const arma::mat& X);
   arma::mat do_gibbs(const arma::mat& X,
                      const arma::vec& Y,
-                     const arma::mat& X_test, int num_iter, 
-                     const arma::vec& weights = arma::ones<arma::vec>(1));
+                     const arma::mat& X_test, int num_iter);
   arma::vec get_s() {return hypers.s;}
   arma::uvec get_counts();
   arma::umat get_tree_counts();
   void set_sigma(double s);
+  void set_weights(const arma::vec& weights);
   double get_sigma();
   void set_s(const arma::vec& s_);
   arma::vec do_predict(const arma::mat& X);
