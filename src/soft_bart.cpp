@@ -261,7 +261,7 @@ void GetSuffStats(Node* n, const arma::vec& y,
   Lambda = Lambda / pow(hypers.sigma, 2) * hypers.temperature;
   mu_hat = mu_hat / pow(hypers.sigma, 2) * hypers.temperature;
   Omega_inv_out = Lambda + eye(num_leaves, num_leaves) / pow(hypers.sigma_mu, 2);
-  mu_hat_out = solve(Omega_inv_out, mu_hat);
+  mu_hat_out = pinv(Omega_inv_out, mu_hat);
 
 }
 
