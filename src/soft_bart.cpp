@@ -100,8 +100,8 @@ Hypers InitHypers(const mat& X, const arma::vec& weights, const uvec& group, dou
   out.group = group;
 
   // Create mapping of group to variables
-  out.group_to_vars.resize(out.s.size());
-  for(int i = 0; i < out.s.size(); i++) {
+  out.group_to_vars.resize(out.num_groups);
+  for(int i = 0; i < out.num_groups; i++) {
     out.group_to_vars[i].resize(0);
   }
   int P = group.size();
@@ -1171,8 +1171,8 @@ Hypers::Hypers(Rcpp::List hypers) {
   s = 1.0 / group.size() * arma::ones<arma::vec>(group.size());
   logs = log(s);
 
-  group_to_vars.resize(s.size());
-  for(int i = 0; i < s.size(); i++) {
+  group_to_vars.resize(num_groups);
+  for(int i = 0; i < num_groups; i++) {
    group_to_vars[i].resize(0);
   }
   int P = group.size();
